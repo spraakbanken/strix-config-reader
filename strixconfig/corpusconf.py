@@ -30,13 +30,19 @@ class CorpusConfig:
     def get_word_attribute(self, attr_name):
         return self._word_attributes[attr_name]
 
+    def get_word_attributes(self):
+        return self._word_attributes
+
     def get_struct_attribute(self, attr_name):
         return self._struct_attributes[attr_name]
+
+    def get_struct_attributes(self):
+        return self._struct_attributes
 
     def get_text_attribute(self, attr_name):
         return self._text_attributes[attr_name]
 
-    def get_text_attributes(self):
+    def get_text_attributes_by_corpora(self):
         """
         :return: a dict containing all text attributes by corpora
         """
@@ -53,6 +59,9 @@ class CorpusConfig:
         # TODO WHY do we need this???
         text_attributes["litteraturbanken"] = []
         return text_attributes
+
+    def get_text_attributes(self):
+        return self._text_attributes
 
     def is_ranked(self, word_attribute):
         try:
