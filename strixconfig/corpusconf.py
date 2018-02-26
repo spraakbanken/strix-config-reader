@@ -2,7 +2,7 @@ import json
 import os
 import glob
 import logging
-
+import importlib.machinery
 
 class CorpusConfig:
 
@@ -14,6 +14,15 @@ class CorpusConfig:
         self._struct_attributes = self._get_attributes("struct_attributes")
         self._text_attributes = self._get_attributes("text_attributes")
         self._type_info = self._load_type_info()
+        self._plugin_cache = {}
+
+    def get_plugin(self, plugin_name):
+        if plugin_name not in self._plugin_cache:
+            plugin_path = os.path.join(self.settings_dir, "strixplugins", plugin_name + ".py")
+            module_name = "strixplugins." + plugin_name
+            plugin = importlib.machinery.SourceFileLoader(module_name, plugin_path).load_module()
+            self._plugin_cache[plugin_name] = plugin
+        return self._plugin_cache[plugin_name]
 
     def get_corpus_conf(self, corpus_id):
         """
