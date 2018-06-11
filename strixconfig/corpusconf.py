@@ -4,6 +4,7 @@ import glob
 import logging
 import importlib.machinery
 
+
 class CorpusConfig:
 
     def __init__(self, settings_dir):
