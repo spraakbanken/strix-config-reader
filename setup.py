@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name='strixconfig',
-    version='0.1',
+    name='strixconfigurer',
+    version='1.0.dev',
     description='',
     url='',
     author='Språkbanken',
     author_email='sb-strix@svenska.gu.se',
     license='MIT',
-    packages=['strixconfig'],
+    packages=['strixconfigurer'],
     zip_safe=False,
     install_requires=[]
 )
