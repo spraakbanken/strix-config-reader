@@ -4,6 +4,7 @@ import glob
 import logging
 import importlib.machinery
 
+
 class CorpusConfig:
 
     def __init__(self, settings_dir):
@@ -18,7 +19,7 @@ class CorpusConfig:
 
     def get_plugin(self, plugin_name):
         if plugin_name not in self._plugin_cache:
-            plugin_path = os.path.join(self.settings_dir, "strixplugins", plugin_name + ".py")
+            plugin_path = os.path.join(self.settings_dir, "plugins", plugin_name + ".py")
             module_name = "strixplugins." + plugin_name
             plugin = importlib.machinery.SourceFileLoader(module_name, plugin_path).load_module()
             self._plugin_cache[plugin_name] = plugin
@@ -90,7 +91,7 @@ class CorpusConfig:
         return self._type_info
 
     def _load_type_info(self):
-        type_file = os.path.join(self.settings_dir, "config/attributes/types.json")
+        type_file = os.path.join(self.settings_dir, "attributes/types.json")
         return json.load(open(type_file))
 
     def _get_all_config_files(self):
@@ -121,10 +122,10 @@ class CorpusConfig:
         return config_obj
 
     def _get_config_file(self, corpus_id, config_type="corpora"):
-        return os.path.join(self.settings_dir, "config", config_type, corpus_id + ".json")
+        return os.path.join(self.settings_dir, config_type, corpus_id + ".json")
 
     def _get_attributes(self, attr_type):
-        return json.load(open(os.path.join(self.settings_dir, "config", "attributes", attr_type + ".json")))
+        return json.load(open(os.path.join(self.settings_dir, "attributes", attr_type + ".json")))
 
 
 def _merge_configs(target, source):
