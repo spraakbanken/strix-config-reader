@@ -15,6 +15,7 @@ class CorpusConfig:
         self._struct_attributes = self._get_attributes("struct_attributes")
         self._text_attributes = self._get_attributes("text_attributes")
         self._type_info = self._load_type_info()
+        self._struct_elems = self._load_struct_elems()
         self._plugin_cache = {}
 
     def get_plugin(self, plugin_name):
@@ -90,8 +91,15 @@ class CorpusConfig:
     def get_type_info(self):
         return self._type_info
 
+    def get_struct_elem(self, elem):
+        return self._struct_elems[elem]
+
     def _load_type_info(self):
         type_file = os.path.join(self.settings_dir, "attributes/types.json")
+        return json.load(open(type_file))
+
+    def _load_struct_elems(self):
+        type_file = os.path.join(self.settings_dir, "attributes/struct_elems.json")
         return json.load(open(type_file))
 
     def _get_all_config_files(self):
