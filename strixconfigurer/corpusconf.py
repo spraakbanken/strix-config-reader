@@ -80,14 +80,6 @@ class CorpusConfig:
         except KeyError:
             raise ValueError("\"" + word_attribute + "\" is not configured")
 
-    def is_object(self, path):
-        try:
-            if path[-1] in self._struct_attributes:
-                return not self._struct_attributes[path[-1]].get("index_in_text", True)
-            return False
-        except KeyError:
-            raise ValueError("\"" + ".".join(path) + "\" is not configured")
-
     def get_type_info(self):
         return self._type_info
 
