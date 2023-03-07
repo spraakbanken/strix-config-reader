@@ -73,6 +73,7 @@ class CorpusConfig:
         :return: a dict containing all text attributes by corpora
         """
         text_attributes = {}
+        text_attributes_list = {}
         for key, conf in self._all_config_files.items():
             try:
                 # text_attributes[key] = dict((attr, self._text_attributes[attr]) for attr in conf["analyze_config"]["text_attributes"])
@@ -82,6 +83,7 @@ class CorpusConfig:
                         if type(attr) is str:
                             attr = self.get_text_attributeX(attr)
                         tempDict[attr_name] = attr
+                        text_attributes_list[attr_name] = attr
                 text_attributes[key] = tempDict
                         
             except KeyError:
@@ -89,9 +91,9 @@ class CorpusConfig:
                 continue
             if "title" in text_attributes[key]:
                 del text_attributes[key]["title"]
-
+        text_attributes_list['yearR'] = {'name': 'yearR', 'translation_name': {'swe': 'År', 'eng': 'Year'}}
         # TODO WHY do we need this???
-        text_attributes["litteraturbanken"] = []
+        text_attributes["litteraturbanken"] = text_attributes_list
         return text_attributes
 
     def get_text_attributes(self):
