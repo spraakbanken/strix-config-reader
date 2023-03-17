@@ -168,6 +168,10 @@ class CorpusConfig:
         with open(os.path.join(self.settings_dir, "attributes", attr_type + ".yaml")) as file:
             return yaml.load(file, Loader=SafeLoader)
 
+    def get_folders_info(self):
+        with open(os.path.join(self.settings_dir, "all_folders.yaml")) as file:
+            return yaml.load(file, Loader=SafeLoader)
+
 def _merge_configs(target, source):
     """
     Merge two corpus configurations.
