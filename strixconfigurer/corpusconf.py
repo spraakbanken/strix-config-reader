@@ -14,6 +14,7 @@ class CorpusConfig:
         self.logger = logging.getLogger(__name__)
         self.settings_dir = settings_dir
         self._all_config_files = self._get_all_config_files()
+        self.corpora_protected = self._get_protected()
         self._word_attributes = self._get_attributes("word_attributes")
         self._struct_attributes = self._get_attributes("struct_attributes")
         self._text_attributes = self._get_attributes("text_attributes")
@@ -133,6 +134,13 @@ class CorpusConfig:
             key = os.path.splitext(os.path.basename(file))[0]
             config_files[key] = self._fetch_corpus_conf(key)
         return config_files
+    
+    def _get_protected(self):
+        config_protected = {}
+        for file in glob.glob(self._get_config_file("*")):
+            key = os.path.splitext(os.path.basename(file))[0]
+            config_protected[key] = self._fetch_corpus_conf(key).get("protected", False)
+        return config_protected
 
     def _fetch_corpus_conf(self, corpus_id, config_type="corpora"):
         """
