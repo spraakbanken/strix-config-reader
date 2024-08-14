@@ -1,9 +1,12 @@
+# corpusconfig
 import json
 import os
 import glob
 import logging
 import importlib.machinery
 
+import yaml
+from yaml.loader import SafeLoader
 
 class CorpusConfig:
 
@@ -11,6 +14,7 @@ class CorpusConfig:
         self.logger = logging.getLogger(__name__)
         self.settings_dir = settings_dir
         self._all_config_files = self._get_all_config_files()
+        self.corpora_protected = self._get_protected()
         self._word_attributes = self._get_attributes("word_attributes")
         self._struct_attributes = self._get_attributes("struct_attributes")
         self._text_attributes = self._get_attributes("text_attributes")
@@ -41,11 +45,19 @@ class CorpusConfig:
     def get_word_attribute(self, attr_name):
         return self._word_attributes[attr_name]
 
+    def get_word_attributeX(self, attr_name):
+        with open(os.path.join(self.settings_dir, "attributes/positional/"+attr_name+".yaml")) as file:
+            return yaml.load(file, Loader=SafeLoader)
+
     def get_word_attributes(self):
         return self._word_attributes
 
     def get_struct_attribute(self, attr_name):
         return self._struct_attributes[attr_name]
+
+    def get_struct_attributeX(self, attr_name):
+        with open(os.path.join(self.settings_dir, "attributes/structural/"+attr_name+".yaml")) as file:
+            return yaml.load(file, Loader=SafeLoader)
 
     def get_struct_attributes(self):
         return self._struct_attributes
@@ -53,22 +65,36 @@ class CorpusConfig:
     def get_text_attribute(self, attr_name):
         return self._text_attributes[attr_name]
 
+    def get_text_attributeX(self, attr_name):
+        with open(os.path.join(self.settings_dir, "attributes/structural/"+attr_name+".yaml")) as file:
+            return yaml.load(file, Loader=SafeLoader)
+
     def get_text_attributes_by_corpora(self):
         """
         :return: a dict containing all text attributes by corpora
         """
         text_attributes = {}
+        text_attributes_list = {}
         for key, conf in self._all_config_files.items():
             try:
-                text_attributes[key] = dict((attr, self._text_attributes[attr]) for attr in conf["analyze_config"]["text_attributes"])
+                # text_attributes[key] = dict((attr, self._text_attributes[attr]) for attr in conf["analyze_config"]["text_attributes"])
+                tempDict = {}
+                for attr_dict in conf["analyze_config"]["text_attributes"]:
+                    for attr_name, attr in attr_dict.items():
+                        if type(attr) is str:
+                            attr = self.get_text_attributeX(attr)
+                        tempDict[attr_name] = attr
+                        text_attributes_list[attr_name] = attr
+                text_attributes[key] = tempDict
+                        
             except KeyError:
                 self.logger.info("No text attributes for corpus: %s" % key)
                 continue
             if "title" in text_attributes[key]:
                 del text_attributes[key]["title"]
-
+        text_attributes_list['yearR'] = {'name': 'yearR', 'translation_name': {'swe': 'År', 'eng': 'Year'}}
         # TODO WHY do we need this???
-        text_attributes["litteraturbanken"] = []
+        text_attributes["litteraturbanken"] = text_attributes_list
         return text_attributes
 
     def get_text_attributes(self):
@@ -86,13 +112,21 @@ class CorpusConfig:
     def get_struct_elem(self, elem):
         return self._struct_elems[elem]
 
+    # def _load_type_info(self):
+    #     type_file = os.path.join(self.settings_dir, "attributes/types.json")
+    #     return json.load(open(type_file))
+
     def _load_type_info(self):
-        type_file = os.path.join(self.settings_dir, "attributes/types.json")
-        return json.load(open(type_file))
+         with open(os.path.join(self.settings_dir, "attributes/types.yaml")) as file:
+            return yaml.load(file, Loader=SafeLoader)
+
+    # def _load_struct_elems(self):
+    #     type_file = os.path.join(self.settings_dir, "attributes/struct_elems.json")
+    #     return json.load(open(type_file))
 
     def _load_struct_elems(self):
-        type_file = os.path.join(self.settings_dir, "attributes/struct_elems.json")
-        return json.load(open(type_file))
+        with open(os.path.join(self.settings_dir, "attributes/struct_elems.yaml")) as file:
+            return yaml.load(file, Loader=SafeLoader)
 
     def _get_all_config_files(self):
         config_files = {}
@@ -100,6 +134,13 @@ class CorpusConfig:
             key = os.path.splitext(os.path.basename(file))[0]
             config_files[key] = self._fetch_corpus_conf(key)
         return config_files
+    
+    def _get_protected(self):
+        config_protected = {}
+        for file in glob.glob(self._get_config_file("*")):
+            key = os.path.splitext(os.path.basename(file))[0]
+            config_protected[key] = self._fetch_corpus_conf(key).get("protected", False)
+        return config_protected
 
     def _fetch_corpus_conf(self, corpus_id, config_type="corpora"):
         """
@@ -110,7 +151,8 @@ class CorpusConfig:
         """
         config_file = self._get_config_file(corpus_id, config_type)
         try:
-            config_obj = json.load(open(config_file))
+            # config_obj = json.load(open(config_file))
+            config_obj = yaml.load(open(config_file), Loader=SafeLoader)
         except Exception:
             self.logger.error("Could not read config file: " + config_file)
             raise
@@ -121,12 +163,22 @@ class CorpusConfig:
             _merge_configs(config_obj, parent_obj)
         return config_obj
 
+    # def _get_config_file(self, corpus_id, config_type="corpora"):
+    #     return os.path.join(self.settings_dir, config_type, corpus_id + ".json")
+    
     def _get_config_file(self, corpus_id, config_type="corpora"):
-        return os.path.join(self.settings_dir, config_type, corpus_id + ".json")
+        return os.path.join(self.settings_dir, config_type, corpus_id + ".yaml") 
+
+    # def _get_attributes(self, attr_type):
+    #     return json.load(open(os.path.join(self.settings_dir, "attributes", attr_type + ".json")))
 
     def _get_attributes(self, attr_type):
-        return json.load(open(os.path.join(self.settings_dir, "attributes", attr_type + ".json")))
+        with open(os.path.join(self.settings_dir, "attributes", attr_type + ".yaml")) as file:
+            return yaml.load(file, Loader=SafeLoader)
 
+    def get_folders_info(self):
+        with open(os.path.join(self.settings_dir, "all_folders.yaml")) as file:
+            return yaml.load(file, Loader=SafeLoader)
 
 def _merge_configs(target, source):
     """
