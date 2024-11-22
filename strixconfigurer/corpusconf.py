@@ -20,6 +20,14 @@ class CorpusConfig:
         self._type_info = self._load_type_info()
         self._struct_elems = self._load_struct_elems()
 
+    def get_modes(self):
+        modes = {}
+        for filename in glob.glob(os.path.join(self.settings_dir, "modes/*")):
+            with open(filename) as file:
+                mode = yaml.load(file, Loader=SafeLoader)
+                modes[mode["name"]] = mode
+        return modes
+
     def get_corpus_conf(self, corpus_id):
         """
         get all information about corpus_id
