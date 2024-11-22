@@ -2,7 +2,6 @@ from setuptools import setup
 
 setup(
     name='strixconfigurer',
-    version='1.1',
     description='',
     url='',
     author='Språkbanken',
