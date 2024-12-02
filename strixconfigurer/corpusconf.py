@@ -25,7 +25,8 @@ class CorpusConfig:
         for filename in glob.glob(os.path.join(self.settings_dir, "modes/*")):
             with open(filename) as file:
                 mode = yaml.load(file, Loader=SafeLoader)
-                modes[mode["name"]] = mode
+                mode_name = next(iter(mode))
+                modes[mode_name] = mode[mode_name]
         return modes
 
     def get_corpus_conf(self, corpus_id):
